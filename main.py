@@ -3,11 +3,7 @@ import sys
 import models
 from database import engine
 import uvicorn
-
-
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-
+from fastapi import FastAPI
 
 from routers import user
 from routers import address
