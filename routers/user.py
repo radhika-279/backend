@@ -1,6 +1,5 @@
-
-from typing import List, Union
-from fastapi import HTTPException, Depends
+from typing import List, Union, Optional
+from fastapi import HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status
 from models import Users
@@ -23,6 +22,8 @@ class UsersBase(BaseModel):
     is_active: Union[bool, None] = None
     created_at: Union[datetime, None] = None
     updated_at: Union[datetime, None] = None
+    role:Optional[str]=None
+    
 
     class Config:
         orm_mode = True
@@ -78,10 +79,6 @@ def get_one_user(user_id: int, db: Session = Depends(get_db)):
     return db_entry
 
 # -- 5. Get all users
-@router.get("/all", response_model=List[UsersBase])
-def get_all_users(db: Session = Depends(get_db)):
-    try:
-        users = db.query(Users).all()
-        return [UsersBase(**user.__dict__) for user in users]
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@router.get("/", response_model=List[UsersBase])
+def get_all_addresses(db: Session = Depends(get_db)):
+    return db.query(Users).all()

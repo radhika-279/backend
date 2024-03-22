@@ -1,17 +1,4 @@
-
-# # -- 5. Get  cities
-# @router.get('/cities/', response_model=List[AddressBase])
-# def get_all_address(db: Session = Depends(get_db)):
-#     return db.query(Address).all()
-
-# # --Filter Cities--#
-# @router.get("/cities/")
-# def search_cities(query: str = Query(..., min_length=3, description="Search query for cities"), db: Session = Depends(get_db)):
-#     cities = db.query(City).filter(City.name.ilike(f"%{query}%")).all()
-#     return {"cities": [city.name for city in cities]}
-
-
-from typing import List, Union
+from typing import List, Union,Optional
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette import status
@@ -35,7 +22,8 @@ class AddressBase(BaseModel):
     postal_code: int
     latitude: float
     longitude: float
-    role: str 
+    role:Optional[str]=None
+    
     class Config:
         orm_mode = True
 
@@ -96,19 +84,16 @@ def get_one_address(address_id: int, db: Session = Depends(get_db)):
     return db_entry
 
 # -- 5. Get all addresses
-# @router.get("/all", response_model=List[AddressBase])
-# def get_all_addresses(city: str = None, db: Session = Depends(get_db)):
-#     if city:
-#         addresses = db.query(Address).filter(Address.city == city).all()
-#     else:
-#         addresses = db.query(Address).all()
-#     return addresses
+@router.get("/", response_model=List[AddressBase])
+def get_all_addresses(city: Optional[str] = None, db: Session = Depends(get_db)):
+    try:
+        if city:
+            addresses = db.query(Address).filter(Address.city == city).all()
+        else:
+            addresses = db.query(Address).all()
+        return addresses
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-# @router.get('/', response_model=List[AddressBase])
-# def get_all_addresses(db: Session = Depends(get_db)):
-#     addresses_addresses = db.query(Address).filter(Address.role == "Address").all()
-#     return addresses_addresses
 
-@router.get('/', response_model=List[AddressBase])
-def get_all_address(db: Session = Depends(get_db)):
-    return db.query(AddressBase).all()
+
